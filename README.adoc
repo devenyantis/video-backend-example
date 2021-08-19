@@ -29,7 +29,7 @@ To run your application:
 * https://gitter.im/eclipse-vertx/vertx-users[Vert.x Gitter]
 
 == Still WIP
-- Change video file path here. [https://github.com/devenyantis/video-backend-example/blob/64cf168ac6aa0edf0064dccf184b6c8a979ab110/src/main/java/com/example/videobackend/video_backend_example/VideoEndpoint.java#L23]
+- Change video file path here. https://github.com/devenyantis/video-backend-example/blob/64cf168ac6aa0edf0064dccf184b6c8a979ab110/src/main/java/com/example/videobackend/video_backend_example/VideoEndpoint.java#L23
 - vertx will complain for thread blocking when you run init api
 - There are 3 api for now.
   - ```localhost:9999/video``` - Just to check the server state indicating that server is up. Will always return ok. 
