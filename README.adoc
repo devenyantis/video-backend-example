@@ -28,4 +28,19 @@ To run your application:
 * https://groups.google.com/forum/?fromgroups#!forum/vertx[Vert.x User Group]
 * https://gitter.im/eclipse-vertx/vertx-users[Vert.x Gitter]
 
-
+== Still WIP
+- Change video file path [here](https://github.com/devenyantis/video-backend-example/blob/64cf168ac6aa0edf0064dccf184b6c8a979ab110/src/main/java/com/example/videobackend/video_backend_example/VideoEndpoint.java#L23)
+- vertx will complain for thread blocking when you run init api
+- There are 3 api for now.
+  - ```localhost:9999/video``` - Just to check the server state indicating that server is up. Will always return ok. 
+  - ```localhost:9999/video/init``` - To run video extraction. Frames are saved as base64 into in-memory array
+      * response: Ok or Fail
+  - ```localhost:9999/video/frame/{frameIdx}```
+      * eg: ```localhost:9999/video/frame/0```
+      * response:
+      ```
+      {
+        "message": 1,
+        "encodedImg": base 64 string
+      }
+      ```
