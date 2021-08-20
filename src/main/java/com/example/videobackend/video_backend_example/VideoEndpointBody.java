@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class VideoEndpointBody {
-    String id;
-    int frameNumber;
+    String videoPath;
+    boolean saveFrameToFolder;
 }

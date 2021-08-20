@@ -2,7 +2,6 @@ package com.example.videobackend.video_backend_example;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -13,18 +12,20 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-@Slf4j
 public class VideoObject {
 
-    @Getter
-    private final List<String> base64Frames = new ArrayList<>();
-    @Setter
-    private boolean saveFrames = false;
+    @Getter private final List<String> base64Frames = new ArrayList<>();
+    @Getter int videoLength;
+    @Getter int framesPerSecond;
+    @Getter int numOfGeneratedFrames = 0;
+
+    @Setter private boolean saveFramesToFolder = false;
 
     static {
         nu.pattern.OpenCV.loadLocally();
@@ -34,41 +35,42 @@ public class VideoObject {
     public boolean initVideoObject(String videoPath) {
 
         if(extractFrames(videoPath)) {
-            log.info("Video process successful");
+            System.out.println("Video process successful");
             return true;
         }
 
-        log.info("Video process fail");
+        System.out.println("Video process fail");
         return false;
     }
 
     private boolean extractFrames(String videoPath) {
-        Mat frame = new Mat();
-        int frame_number = 0;
         VideoCapture cap = new VideoCapture();
         cap.open(videoPath);
 
-        int video_length = (int) cap.get(Videoio.CAP_PROP_FRAME_COUNT);
-        int frames_per_second = (int) cap.get(Videoio.CAP_PROP_FPS);
+        videoLength = (int) cap.get(Videoio.CAP_PROP_FRAME_COUNT);
+        framesPerSecond = (int) cap.get(Videoio.CAP_PROP_FPS);
 
         if(cap.isOpened()) {
 
             System.out.println("Video is opened");
-            System.out.println("Number of Frames: " + video_length);
-            System.out.println(frames_per_second + " Frames per Second");
+            System.out.println("Number of Frames: " + videoLength);
+            System.out.println(framesPerSecond + " Frames per Second");
             System.out.println("Converting Video...");
+
+            Mat frame = new Mat();
+            int generatedFrames = 0;
             while(cap.read(frame)) //the last frame of the movie will be invalid. check for it !
             {
                 base64Frames.add(base64FromBufferedImage(toBufferedImage(frame)));
-                if(saveFrames) {
+                if(saveFramesToFolder) {
                     String output = getOutputFolder(videoPath);
-                    Imgcodecs.imwrite(output + "/" + frame_number +".jpg", frame);
+                    Imgcodecs.imwrite(output + "/" + generatedFrames +".jpg", frame);
                 }
 
-                frame_number++;
+                generatedFrames++;
             }
+            numOfGeneratedFrames = generatedFrames + 1; // Because frame index start at 0
             cap.release();
-
             return true;
         }
 
@@ -77,8 +79,16 @@ public class VideoObject {
     }
 
     private String getOutputFolder(String videoPath) {
-        String parentDir = Paths.get(videoPath).toFile().getAbsoluteFile().getParentFile().getName();
-        return Paths.get(parentDir, "outputs").toString();
+        String parentDir = Paths.get(videoPath).toFile().getAbsoluteFile().getParentFile().toString();
+        File saveOutputPath = Paths.get(parentDir, "outputs").toFile();
+
+        if(!saveOutputPath.exists()) {
+            saveOutputPath.mkdir();
+        }
+
+//        System.out.println("Saving output to " + saveOutputPath);
+
+        return saveOutputPath.toString();
     }
 
     public BufferedImage toBufferedImage(Mat m) {
@@ -100,16 +110,15 @@ public class VideoObject {
         try
         {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ImageIO.write(img, "PNG", out);
-            byte[] bytes = out.toByteArray();
-            String base64bytes = Base64.getEncoder().encodeToString(bytes);
+            ImageIO.write(img, "JPG", out);
+            String base64bytes = Base64.getEncoder().encodeToString(out.toByteArray());
 
             return "data:image/png;base64," + base64bytes;
         }
         catch (Exception e)
         {
-            log.info("Fail to convert");
-            return "";
+            System.out.println("Fail to convert");
+            return null;
         }
     }
 

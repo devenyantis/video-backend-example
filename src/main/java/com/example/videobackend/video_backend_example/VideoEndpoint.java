@@ -18,13 +18,15 @@ public class VideoEndpoint {
     @POST()
     @Path("/init")
     @Produces("application/json")
-    public ActionStatus initVideoProject() {
+    @RequestReader(BodyReader.class)
+    public VideoResponseStatus initVideoProject(VideoEndpointBody body) {
         videoObject = new VideoObject();
-        if(videoObject.initVideoObject("C:\\Users\\Deven.Yantis\\Documents\\example_videos\\vid2.mp4")) {
-            return ActionStatus.ok();
+        videoObject.setSaveFramesToFolder(body.saveFrameToFolder);
+        if(videoObject.initVideoObject(body.videoPath)) {
+            return VideoResponseStatus.okWithInitInfo(videoObject.getFramesPerSecond(), videoObject.getNumOfGeneratedFrames());
         }
 
-        return ActionStatus.failedWithMessage("Fail to init video");
+        return VideoResponseStatus.failedWithMessage("Fail to init video");
     }
 
     @GET()
@@ -38,6 +40,6 @@ public class VideoEndpoint {
         if(frame == null) {
             return VideoResponseStatus.failedWithMessage("Fail to get frame");
         }
-        return VideoResponseStatus.ok(frame);
+        return VideoResponseStatus.okWithReturnFrame(frame);
     }
 }

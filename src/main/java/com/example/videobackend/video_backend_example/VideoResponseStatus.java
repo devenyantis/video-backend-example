@@ -3,9 +3,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 public interface VideoResponseStatus {
-    static VideoResponseStatus ok(String base64Img)
+    static VideoResponseStatus okWithReturnFrame(String base64Img)
     {
-        return new VideoActionSucceed(base64Img);
+        return new VideoActionSucceedWithFrame(base64Img);
+    }
+
+    static VideoResponseStatus okWithInitInfo(int numOfFrames, int numOfGeneratedFrames)
+    {
+        return new VideoActionSucceedReturnInfo(numOfFrames, numOfGeneratedFrames);
     }
 
     static VideoResponseStatus failedWithMessage(String msg)
@@ -16,9 +21,17 @@ public interface VideoResponseStatus {
 
 @Data
 @AllArgsConstructor
-class VideoActionSucceed implements VideoResponseStatus {
+class VideoActionSucceedWithFrame implements VideoResponseStatus {
     private final int message = 1;
     private String encodedImg;
+}
+
+@Data
+@AllArgsConstructor
+class VideoActionSucceedReturnInfo implements VideoResponseStatus {
+    private final int message = 1;
+    private int videoFramePerSecond;
+    private int numOfGeneratedFrames;
 }
 
 @Data
